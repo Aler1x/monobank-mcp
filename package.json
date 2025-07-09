@@ -1,13 +1,21 @@
 {
   "name": "monobank-mcp",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "MonoBank MCP Server",
   "type": "module",
+  "main": "dist/index.js", 
+  "files": ["dist"],
   "scripts": {
-    "dev": "tsx --watch src/index.ts"
+    "dev": "tsx --watch src/index.ts",
+    "prepare": "npm run build",
+    "build": "tsc"
+  },
+  "author": "Alerix Nightfield",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aler1x/monobank-mcp"
   },
   "keywords": ["mcp", "monobank", "api"],
-  "author": "Alerix Nightfield (inspired by Nazar Klymok)",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
