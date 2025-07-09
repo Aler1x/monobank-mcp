@@ -56,7 +56,7 @@ This is a **Node.js/TypeScript port** of the original Python implementation by [
      "mcpServers": {
        "monobank-mcp": {
          "command": "npx",
-         "args": ["tsx","/path/to/monobank-mcp/src/index.ts"],
+         "args": ["-y","monobank-mcp"],
          "env": {
            "MONOBANK_API_TOKEN": "your_token_here"
          }

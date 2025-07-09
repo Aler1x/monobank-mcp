@@ -1,9 +1,12 @@
 {
   "name": "monobank-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MonoBank MCP Server",
   "type": "module",
-  "main": "dist/index.js", 
+  "main": "dist/index.js",
+  "bin": {
+    "monobank-mcp": "dist/index.js"
+  },
   "files": ["dist"],
   "scripts": {
     "dev": "tsx --watch src/index.ts",
