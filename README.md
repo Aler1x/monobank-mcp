@@ -14,8 +14,6 @@ This is a **Node.js/TypeScript port** of the original Python implementation by [
 ## Features
 
 - TypeScript/Node.js MCP server using the official @modelcontextprotocol/sdk
-- Function-based architecture (no classes)
-- Single file implementation with native `fetch` (no external HTTP dependencies)
 - Two ready-to-use MCP tools:
   - `get_client_info` – returns client, accounts and jars metadata.
   - `get_statement` – returns account statement for a given period (≤ 31 days).
@@ -83,11 +81,15 @@ MONOBANK_API_TOKEN=your_token_here npm run dev
 | `get_client_info` | Fetches client profile, list of accounts and jars.                                                                                | 1 request / 60 s |
 | `get_statement`   | Retrieves transaction list for a specific account and time range.<br/>Parameters: `account_id`, `from_timestamp`, `to_timestamp`. | 1 request / 60 s |
 
+## API Token
+
+To use this server, you need a personal Monobank API token. You can get one from the official Monobank API documentation: https://api.monobank.ua/index.html
+
 ## Environment Variables
 
 | Name                 | Required | Description                       |
 | -------------------- | -------- | --------------------------------- |
-| `MONOBANK_API_TOKEN` | ✅       | Your personal Monobank API token. |
+| `MONOBANK_API_TOKEN` | ✅       | Your personal Monobank API token. Get it from https://api.monobank.ua/index.html |
 
 ## License
 
