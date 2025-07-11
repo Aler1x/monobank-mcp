@@ -1,13 +1,15 @@
 {
   "name": "monobank-mcp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "MonoBank MCP Server",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "monobank-mcp": "dist/index.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "tsx --watch src/index.ts",
     "prepare": "npm run build",
@@ -18,7 +20,11 @@
     "type": "git",
     "url": "https://github.com/aler1x/monobank-mcp"
   },
-  "keywords": ["mcp", "monobank", "api"],
+  "keywords": [
+    "mcp",
+    "monobank",
+    "api"
+  ],
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
@@ -29,4 +35,4 @@
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
-} 
+}
