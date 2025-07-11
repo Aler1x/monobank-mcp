@@ -18,10 +18,35 @@ This is a **Node.js/TypeScript port** of the original Python implementation by [
   - `get_client_info` – returns client, accounts and jars metadata.
   - `get_statement` – returns account statement for a given period (≤ 31 days).
 
-## Quick Start
+## Usage (Published Package)
 
-1. **Install dependencies**
+The easiest way to use this MCP server is via the published npm package:
+
+1. **Register the server in your MCP configuration**
+   ```json
+   {
+     "mcpServers": {
+       "monobank-mcp": {
+         "command": "npx",
+         "args": ["-y", "monobank-mcp"],
+         "env": {
+           "MONOBANK_API_TOKEN": "your_token_here"
+         }
+       }
+     }
+   }
+   ```
+
+2. **Run your MCP client** – the two tools will be available immediately.
+
+## Development
+
+If you want to contribute or modify the server:
+
+1. **Clone and install dependencies**
    ```bash
+   git clone https://github.com/your-username/Monobank-MCP.git
+   cd Monobank-MCP
    npm install
    ```
 
@@ -50,29 +75,10 @@ This is a **Node.js/TypeScript port** of the original Python implementation by [
    MONOBANK_API_TOKEN=your_token_here npm start
    ```
 
-4. **Register the server in your MCP configuration**
-   ```json
-   {
-     "mcpServers": {
-       "monobank-mcp": {
-         "command": "npx",
-         "args": ["-y","monobank-mcp"],
-         "env": {
-           "MONOBANK_API_TOKEN": "your_token_here"
-         }
-       }
-     }
-   }
+3. **For development with hot reload:**
+   ```bash
+   MONOBANK_API_TOKEN=your_token_here npm run dev
    ```
-
-5. **Run your MCP client** – the two tools will be available immediately.
-
-## Development
-
-For development with hot reload:
-```bash
-MONOBANK_API_TOKEN=your_token_here npm run dev
-```
 
 ## Tool Reference
 
