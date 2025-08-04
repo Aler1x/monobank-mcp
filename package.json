@@ -1,11 +1,11 @@
 {
-  "name": "monobank-mcp",
-  "version": "1.0.2",
-  "description": "MonoBank MCP Server",
+  "name": "@alerix/monobank-mcp",
+  "version": "1.1.2",
+  "description": "Monobank MCP Server",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "monobank-mcp": "dist/index.js"
+    "@alerix/monobank-mcp": "dist/index.js"
   },
   "files": [
     "dist"

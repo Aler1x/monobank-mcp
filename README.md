@@ -28,7 +28,7 @@ The easiest way to use this MCP server is via the published npm package:
      "mcpServers": {
        "monobank-mcp": {
          "command": "npx",
-         "args": ["-y", "monobank-mcp"],
+         "args": ["-y", "@alerix/monobank-mcp"],
          "env": {
            "MONOBANK_API_TOKEN": "your_token_here"
          }
