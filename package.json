@@ -1,6 +1,6 @@
 {
   "name": "@alerix/monobank-mcp",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Monobank MCP Server",
   "type": "module",
   "main": "dist/index.js",
@@ -31,8 +31,8 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "@types/node": "^22.19.17",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
