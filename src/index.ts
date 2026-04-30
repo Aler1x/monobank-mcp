@@ -8,13 +8,13 @@ import {
   CallToolRequest,
 } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { monobankPersonalJson, monobankPublicJson } from "./monobank-http";
+import { monobankPersonalJson, monobankPublicJson } from "./monobank-http.js";
 import type {
   ClientInfo,
   CurrencyRate,
   ProcessedStatementItem,
   StatementItem,
-} from "./types";
+} from "./types.js";
 
 /** Monobank `/personal/statement/...`: max interval is 31 days + 1 hour (API error otherwise). */
 const MONO_STATEMENT_MAX_SPAN_SECONDS = 31 * 24 * 60 * 60 + 60 * 60;

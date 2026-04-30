@@ -1,6 +1,6 @@
 {
   "name": "@alerix/monobank-mcp",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Monobank MCP Server",
   "type": "module",
   "main": "dist/index.js",
