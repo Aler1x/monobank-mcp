@@ -14,9 +14,10 @@ This is a **Node.js/TypeScript port** of the original Python implementation by [
 ## Features
 
 - TypeScript/Node.js MCP server using the official `@modelcontextprotocol/sdk`
+- **stdio** (local MCP clients) and **HTTP Streamable MCP** at **`/mcp`** (remote URLs). Personal Monobank calls use the token from **`Authorization: Bearer …`** or **`X-Monobank-Token`** on each HTTP request — not from tool arguments — so the token is not sent through the model as tool parameters.
 - MCP tools:
-  - **`get_client_info`** – client identity, accounts, and jars (requires `MONOBANK_API_TOKEN`).
-  - **`get_statement`** – account statement for a time window (requires token). Validates the period before calling the API; responses use amounts in main units and ISO 8601 UTC times for transactions.
+  - **`get_client_info`** – client identity, accounts, and jars (requires token via HTTP headers or **`MONOBANK_API_TOKEN`** on stdio).
+  - **`get_statement`** – account statement for a time window (same token rules). Validates the period before calling the API; responses use amounts in main units and ISO 8601 UTC times for transactions.
   - **`get_currency_rates`** – public currency exchange rates from Monobank (`GET /bank/currency`). **No API token required.**
 
 ## Usage (Published Package)
@@ -39,9 +40,33 @@ The easiest way to use this MCP server is via the published npm package:
    }
    ```
 
-   Set `MONOBANK_API_TOKEN` only if you use **`get_client_info`** or **`get_statement`**. **`get_currency_rates`** works without it.
+   Set `MONOBANK_API_TOKEN` when using **stdio** if you use **`get_client_info`** or **`get_statement`**. For **remote HTTP MCP**, configure your host to send **`Authorization: Bearer <token>`** or **`X-Monobank-Token`** instead (recommended so the token is not passed as tool arguments). **`get_currency_rates`** works without a token.
 
 2. **Run your MCP client** – the tools will be available according to your configuration.
+
+### Remote HTTP MCP (`/mcp`)
+
+Run the HTTP entrypoint (after build):
+
+```bash
+PORT=3333 HOST=0.0.0.0 node dist/http.js
+```
+
+Or `npm run start:http`. Then register your MCP client with the base URL **`https://your-host/mcp`** (Streamable HTTP).
+
+Send your Monobank personal token on **every** MCP HTTP request (initialize, POST with session, GET SSE, DELETE):
+
+- **`Authorization: Bearer <monobank_personal_token>`**, or
+- **`X-Monobank-Token: <monobank_personal_token>`**
+
+Whether your MCP host forwards custom headers depends on the product; use whatever mechanism it provides for **authenticated MCP connections**. Do not put the Monobank token in OAuth “client id” fields unless that UI explicitly maps it to **`Authorization`** or **`X-Monobank-Token`** on MCP requests.
+
+| Variable | Default | Description |
+| -------- | ------- | ----------- |
+| `PORT` | `3333` | Listen port |
+| `HOST` | `0.0.0.0` | Bind address |
+
+Binaries: **`@alerix/monobank-mcp`** (stdio), **`@alerix/monobank-mcp-http`** (HTTP).
 
 ## Development
 
@@ -112,7 +137,9 @@ Personal tools need a Monobank personal API token. See the official docs: https:
 
 | Name                 | Required | Description |
 | -------------------- | -------- | ----------- |
-| `MONOBANK_API_TOKEN` | For **`get_client_info`** and **`get_statement`** only | Your personal Monobank API token from https://api.monobank.ua/index.html. Not used by **`get_currency_rates`**. |
+| `MONOBANK_API_TOKEN` | For **stdio** personal tools when not using per-request HTTP auth | Default Monobank token for **`get_client_info`** / **`get_statement`**. For **HTTP MCP**, prefer **`Authorization`** / **`X-Monobank-Token`** on requests instead. Not used by **`get_currency_rates`**. |
+| `PORT` | HTTP only | Listen port for `dist/http.js` (default `3333`). |
+| `HOST` | HTTP only | Bind address for `dist/http.js` (default `0.0.0.0`). |
 
 ## License
 

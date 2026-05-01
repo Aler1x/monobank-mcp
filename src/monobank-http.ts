@@ -1,11 +1,23 @@
+import { getMonobankTokenFromRequestContext } from "./request-context.js";
+
 export const MONO_API_BASE = "https://api.monobank.ua";
+
+function resolveMonobankToken(): string {
+  const fromRequest = getMonobankTokenFromRequestContext()?.trim();
+  if (fromRequest) return fromRequest;
+  const fromEnv = process.env.MONOBANK_API_TOKEN?.trim();
+  if (fromEnv) return fromEnv;
+  throw new Error(
+    "[configuration] No Monobank API token: set Authorization Bearer or X-Monobank-Token on HTTP MCP requests, or MONOBANK_API_TOKEN for stdio."
+  );
+}
 
 function formatHttpError(status: number, body: string): Error {
   const snippet = body.trim().slice(0, 500);
 
   if (status === 401 || status === 403) {
     return new Error(
-      `[authentication] Monobank API rejected the request (HTTP ${status}). Check MONOBANK_API_TOKEN and permissions.${snippet ? ` Response: ${snippet}` : ""}`
+      `[authentication] Monobank API rejected the request (HTTP ${status}). Check token (HTTP headers or MONOBANK_API_TOKEN) and permissions.${snippet ? ` Response: ${snippet}` : ""}`
     );
   }
 
@@ -21,12 +33,7 @@ function formatHttpError(status: number, body: string): Error {
 }
 
 export async function monobankPersonalJson<T>(path: string): Promise<T> {
-  const token = process.env.MONOBANK_API_TOKEN?.trim();
-  if (!token) {
-    throw new Error(
-      "[configuration] MONOBANK_API_TOKEN is not set. Set it to use personal API tools (get_client_info, get_statement)."
-    );
-  }
+  const token = resolveMonobankToken();
 
   const url = `${MONO_API_BASE}${path}`;
 

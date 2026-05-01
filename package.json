@@ -1,17 +1,19 @@
 {
   "name": "@alerix/monobank-mcp",
-  "version": "1.2.1",
+  "version": "1.4.0",
   "description": "Monobank MCP Server",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "@alerix/monobank-mcp": "dist/index.js"
+    "@alerix/monobank-mcp": "dist/index.js",
+    "@alerix/monobank-mcp-http": "dist/http.js"
   },
   "files": [
     "dist"
   ],
   "scripts": {
     "dev": "tsx --watch src/index.ts",
+    "start:http": "node dist/http.js",
     "prepare": "npm run build",
     "build": "tsc"
   },
@@ -28,9 +30,11 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "express": "^5.2.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "@types/node": "^22.19.17",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
