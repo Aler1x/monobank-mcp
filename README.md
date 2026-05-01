@@ -15,8 +15,8 @@ This is a **Node.js/TypeScript port** of the original Python implementation by [
 
 - TypeScript/Node.js MCP server using the official `@modelcontextprotocol/sdk`
 - MCP tools:
-  - **`get_client_info`** – client identity, accounts, and jars (requires `MONOBANK_API_TOKEN`).
-  - **`get_statement`** – account statement for a time window (requires token). Validates the period before calling the API; responses use amounts in main units and ISO 8601 UTC times for transactions.
+  - **`get_client_info`** – client identity, accounts, and jars. Pass **`api_token`** (Monobank personal token) per request, or set **`MONOBANK_API_TOKEN`** on the server as a default.
+  - **`get_statement`** – account statement for a time window (same token rules as `get_client_info`). Validates the period before calling the API; responses use amounts in main units and ISO 8601 UTC times for transactions.
   - **`get_currency_rates`** – public currency exchange rates from Monobank (`GET /bank/currency`). **No API token required.**
 
 ## Usage (Published Package)
@@ -39,7 +39,7 @@ The easiest way to use this MCP server is via the published npm package:
    }
    ```
 
-   Set `MONOBANK_API_TOKEN` only if you use **`get_client_info`** or **`get_statement`**. **`get_currency_rates`** works without it.
+   Set `MONOBANK_API_TOKEN` only as a **default** for your own machine, or omit it when each user passes **`api_token`** on **`get_client_info`** / **`get_statement`** (needed for shared or hosted MCP so every user reaches **their** Monobank account). **`get_currency_rates`** works without any token.
 
 2. **Run your MCP client** – the tools will be available according to your configuration.
 
@@ -55,7 +55,7 @@ If you want to contribute or modify the server:
    npm install
    ```
 
-2. **Run the server** after install (`prepare` runs `npm run build`). For personal tools, set `MONOBANK_API_TOKEN`.
+2. **Run the server** after install (`prepare` runs `npm run build`). For personal tools, either pass **`api_token`** in tool calls or set **`MONOBANK_API_TOKEN`** as a default.
 
    **Windows (PowerShell):**
 
@@ -100,9 +100,11 @@ If you want to contribute or modify the server:
 
 | Tool                  | Description                                                                                                                                                                                                                                                                                                                                                              | Token | Rate limits (Monobank) |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- | ---------------------- |
-| `get_client_info`     | Fetches client profile, list of accounts and jars.                                                                                                                                                                                                                                                                                                                       | Yes   | 1 request / 60 s       |
-| `get_statement`     | Retrieves transactions for an account and period. Parameters: **`account_id`** (from `get_client_info` or `'0'` for default), **`from_timestamp`** (Unix seconds), optional **`to_timestamp`** (Unix seconds; omit for “now”). Period from `from_timestamp` to the end (`to_timestamp` or now) must be **≤ 31 days + 1 hour** (aligned with the API). Amounts are returned in major units; times as ISO 8601 UTC. Omits `id`, `invoiceId`, `counterEdrpou`, `counterIban`. | Yes   | 1 request / 60 s       |
+| `get_client_info`     | Fetches client profile, list of accounts and jars. Optional **`api_token`**: caller’s Monobank token; if omitted, **`MONOBANK_API_TOKEN`** env is used when set.                                                                                                                                                                                                                                                                                                                       | Yes¹  | 1 request / 60 s       |
+| `get_statement`     | Retrieves transactions for an account and period. Same **`api_token`** rules as `get_client_info`. Parameters: **`account_id`** (from `get_client_info` or `'0'` for default), **`from_timestamp`** (Unix seconds), optional **`to_timestamp`** (Unix seconds; omit for “now”). Period from `from_timestamp` to the end (`to_timestamp` or now) must be **≤ 31 days + 1 hour** (aligned with the API). Amounts are returned in major units; times as ISO 8601 UTC. Omits `id`, `invoiceId`, `counterEdrpou`, `counterIban`. | Yes¹  | 1 request / 60 s       |
 | `get_currency_rates` | Public exchange rates (ISO 4217 numeric currency codes). Same data as Monobank `GET /bank/currency`.                                                                                                                                                                                                                                                                      | No    | Per Monobank public API |
+
+¹ Token via **`api_token`** argument and/or **`MONOBANK_API_TOKEN`** (argument wins when both are present).
 
 ## API Token
 
@@ -112,7 +114,7 @@ Personal tools need a Monobank personal API token. See the official docs: https:
 
 | Name                 | Required | Description |
 | -------------------- | -------- | ----------- |
-| `MONOBANK_API_TOKEN` | For **`get_client_info`** and **`get_statement`** only | Your personal Monobank API token from https://api.monobank.ua/index.html. Not used by **`get_currency_rates`**. |
+| `MONOBANK_API_TOKEN` | Optional | Default Monobank personal API token when **`api_token`** is not passed to **`get_client_info`** / **`get_statement`**. For multi-user setups, prefer **`api_token`** per call instead of sharing one env var on the server. Not used by **`get_currency_rates`**. |
 
 ## License
 

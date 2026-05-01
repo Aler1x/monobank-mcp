@@ -19,8 +19,19 @@ import type {
 /** Monobank `/personal/statement/...`: max interval is 31 days + 1 hour (API error otherwise). */
 const MONO_STATEMENT_MAX_SPAN_SECONDS = 31 * 24 * 60 * 60 + 60 * 60;
 
-const GetStatementArgsSchema = z
-  .object({
+const PersonalTokenArgsSchema = z.object({
+  api_token: z
+    .string()
+    .optional()
+    .describe(
+      "Monobank personal API token for this request (see Monobank app → settings). If omitted, MONOBANK_API_TOKEN from the server environment is used when set."
+    ),
+});
+
+const GetClientInfoArgsSchema = PersonalTokenArgsSchema;
+
+const GetStatementArgsSchema = PersonalTokenArgsSchema.merge(
+  z.object({
     account_id: z
       .string()
       .describe("Account identifier from the list of accounts, or '0' for default"),
@@ -34,6 +45,7 @@ const GetStatementArgsSchema = z
         "End of the statement period (Unix timestamp in seconds). Omit to use the current time."
       ),
   })
+)
   .superRefine((data, ctx) => {
     const endSec = data.to_timestamp ?? Math.floor(Date.now() / 1000);
     const spanSec = endSec - data.from_timestamp;
@@ -67,8 +79,24 @@ function formatValidationError(toolName: string, error: z.ZodError): string {
   return `[validation] Invalid arguments for ${toolName}: ${details}`;
 }
 
-async function getClientInfo() {
-  const data = await monobankPersonalJson<ClientInfo>("/personal/client-info");
+async function getClientInfo(args: unknown) {
+  const parsed = GetClientInfoArgsSchema.safeParse(args ?? {});
+  if (!parsed.success) {
+    return {
+      isError: true,
+      content: [
+        {
+          type: "text",
+          text: formatValidationError("get_client_info", parsed.error),
+        },
+      ],
+    };
+  }
+
+  const data = await monobankPersonalJson<ClientInfo>(
+    "/personal/client-info",
+    parsed.data.api_token
+  );
   return {
     content: [
       {
@@ -93,11 +121,12 @@ async function getStatement(args: unknown) {
     };
   }
 
-  const { account_id, from_timestamp, to_timestamp } = parsed.data;
+  const { account_id, from_timestamp, to_timestamp, api_token } = parsed.data;
   const finalToTimestamp = to_timestamp ?? Math.floor(Date.now() / 1000);
 
   const data = await monobankPersonalJson<StatementItem[]>(
-    `/personal/statement/${account_id}/${from_timestamp}/${finalToTimestamp}`
+    `/personal/statement/${account_id}/${from_timestamp}/${finalToTimestamp}`,
+    api_token
   );
 
   const processedItems: ProcessedStatementItem[] = data.map((item) => {
@@ -149,7 +178,7 @@ function setupServer() {
   const server = new Server(
     {
       name: "monobank",
-      version: "1.2.0",
+      version: "1.3.0",
     },
     {
       capabilities: {
@@ -163,20 +192,31 @@ function setupServer() {
       {
         name: "get_client_info",
         description:
-          "Get client information from Monobank API — client identity, accounts, and jars. Requires MONOBANK_API_TOKEN with appropriate permissions.",
+          "Get client information from Monobank API — client identity, accounts, and jars. Pass api_token for the caller's Monobank personal token, or rely on MONOBANK_API_TOKEN on the server if configured.",
         inputSchema: {
           type: "object",
-          properties: {},
+          properties: {
+            api_token: {
+              type: "string",
+              description:
+                "Monobank personal API token for this request. Omit only if the MCP server sets MONOBANK_API_TOKEN as a default.",
+            },
+          },
           required: [],
         },
       },
       {
         name: "get_statement",
         description:
-          "Get account statement for a period. Important: Monobank allows at most 31 days + 1 hour between from_timestamp and the period end (to_timestamp if set, otherwise now)—pick a shorter window before calling or the API returns HTTP 400. Rate limit: 1 request per 60 seconds. Amounts are converted from minor units (e.g. kopiykas) to main units; transaction times are ISO 8601 UTC. Omits id, invoiceId, counterEdrpou, counterIban.",
+          "Get account statement for a period. Pass api_token for the caller's Monobank token (or use server MONOBANK_API_TOKEN). Important: Monobank allows at most 31 days + 1 hour between from_timestamp and the period end (to_timestamp if set, otherwise now)—pick a shorter window before calling or the API returns HTTP 400. Rate limit: 1 request per 60 seconds. Amounts are converted from minor units (e.g. kopiykas) to main units; transaction times are ISO 8601 UTC. Omits id, invoiceId, counterEdrpou, counterIban.",
         inputSchema: {
           type: "object",
           properties: {
+            api_token: {
+              type: "string",
+              description:
+                "Monobank personal API token for this request. Omit only if the MCP server sets MONOBANK_API_TOKEN as a default.",
+            },
             account_id: {
               type: "string",
               description:
@@ -213,7 +253,7 @@ function setupServer() {
     try {
       switch (request.params.name) {
         case "get_client_info":
-          return await getClientInfo();
+          return await getClientInfo(request.params.arguments);
         case "get_statement":
           return await getStatement(request.params.arguments);
         case "get_currency_rates":
